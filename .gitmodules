@@ -1,0 +1,24 @@
+[submodule "canvas-lms"]
+	path = canvas-lms
+	url = https://github.com/beyond-z/canvas-lms.git
+	branch = bz-staging
+[submodule "beyondz-platform"]
+	path = beyondz-platform
+	url = https://github.com/beyond-z/beyondz-platform.git
+	branch = staging
+[submodule "osqa"]
+	path = osqa
+	url = https://github.com/beyond-z/osqa.git
+	branch = master
+[submodule "braven"]
+	path = braven
+	url = https://github.com/beyond-z/braven.git
+	branch = staging
+[submodule "rubycas-server"]
+	path = rubycas-server
+	url = https://github.com/beyond-z/rubycas-server.git
+	branch = master
+[submodule "salesforce"]
+	path = salesforce
+	url = https://github.com/beyond-z/salesforce
+	branch = master
