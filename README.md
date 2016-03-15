@@ -21,6 +21,14 @@ All services are available at the ```VIRTUAL_HOST``` specified in
 * Join is at [http://join.docker](http://join.docker)
 * Single Sign-on is at [http://sso.docker](http://sso.docker)
 
+By default, the build scripts add two users:
+* join.admin@bebraven.org - access to the Join server's admin dashboard
+* admin@beyondz.org - access to the Canvas admin account
+Note: at the time of writing, if you don't specify admin@beyondz.org
+as the Canvas admin when running ./setup.bat then you have to login with
+whatever account you did create at
+http://canvas.docker/login?canvas_login=1 and add that user.
+
 # Tips and Tricks
 ## Development
 We use a standard fork/branch/pull-request workflow. To make changes,
