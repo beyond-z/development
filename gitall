@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# This script runs git commands against all sub-directories.  E.g. ./gitall status
+
+echo "$@"
+while read repo_name; do
+  (cd $repo_name && git $@)
+done < repos.txt
