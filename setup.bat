@@ -1,19 +1,31 @@
 #!/bin/bash
 
-# Get all the submodules (repos) populated
-git submodule init && git submodule update
+# Setup subdirectories for each project using forked versions of each.  Note: we initially
+# tried to use git submodules, but it was too hard to actively develop using those with a fork/pull workflow
+echo "Cloning all repositories.  IMPORTANT: this assumes that you've forked each repository already"
+current_repo=`git config --get remote.origin.url`
+if [[ $current_repo == "https://github.com/beyond-z/development"* ]]; then
+  echo "You should not run this using the https://github.com/beyond-z/development repository.  Instead, use a fork!"
+  exit 1;
+fi
+if [[ $current_repo != *".git" ]]; then
+  echo "This script assumes the remote origin url ends with '.git'.  Please clone this using 'git clone https://github.com/[your_username]/development.git development'"
+  exit 1;
+fi
 
-# Make sure they track the staging remotes (by default)
-git config -f .gitmodules submodule.canvas-lms.branch bz-staging
-git config -f .gitmodules submodule.beyondz-platform.branch staging
-git config -f .gitmodules submodule.braven.branch staging
-
-# Note: there are no staging branches for the following.  They are just basic projects that we don't actively develop on
-# and the servers all just run off master.
-git config -f .gitmodules submodule.rubycas-server.branch master
-git config -f .gitmodules submodule.osqa.branch master
-git config -f .gitmodules submodule.salesforce.branch master
-
+origin_url=${current_repo%development.git}
+while read repo_name; do
+  if [ -d $repo_name/.git ]; then
+    echo "Skipping clone of $repo_name because it already exists"
+  else
+    clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
+    echo "Running: $clone_cmd_to_run"
+    $clone_cmd_to_run || { echo >&2 "FAILED. Make sure you have forked ${repo_name}"; exit 1; }
+    upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
+    echo "Adding upstream: $upstream_cmd_to_run"
+    $upstream_cmd_to_run
+  fi
+done < repos.txt
 
 bash_src_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 join_src_path="$( cd $bash_src_path; cd beyondz-platform && pwd )"
@@ -84,14 +96,16 @@ if [ "$(uname)" == "Darwin" ]; then
   cp -a ./canvas-lms/docker-compose/config/* ./canvas-lms/config/
   cp -a ./rubycas-server/docker-compose/config/* ./rubycas-server/config/
 
-  docker-compose build --no-cache || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
+  #docker-compose build --no-cache || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
+  docker-compose build || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
 
   #####
   #TODO: pull staging database instead of using the follow rake commands
   ####
+
   echo "Setting up Join development environment at: $join_src_path"
   cd $join_src_path
-  docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:create; bundle exec rake db:migrate; bundle exec rake db:seed;"
+  docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:reset;" # Same as a db:create; db:migrate; db:seed, but also drops the DB first.
   if [ $? -ne 0 ]
   then
      echo "Error: could not setup Join database."
@@ -100,6 +114,9 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Setting up Canvas/Portal development environment at: $canvas_src_path"
   cd $canvas_src_path
+
+  docker-compose run --rm canvasweb /bin/bash -c "bundle install" || { echo >&2 "Error: bundle install failed."; exit 1; }
+  docker-compose run --rm canvasweb /bin/bash -c "npm install" || { echo >&2 "Error: npm install failed"; exit 1; }
 
   #####
   #TODO: pull staging database instead of using rake db:initial_setup script
