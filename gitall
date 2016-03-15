@@ -2,7 +2,6 @@
 
 # This script runs git commands against all sub-directories.  E.g. ./gitall status
 
-echo "$@"
 while read repo_name; do
-  (cd $repo_name && git $@)
+  (cd $repo_name && echo "`pwd`  ------------- " && git $@)
 done < repos.txt
