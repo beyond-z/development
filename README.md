@@ -1,10 +1,10 @@
 This is a top-level repository that helps get a Braven development
 environment setup on your local machine.
 
-The list of repositories that this sets up is located in [repos.txt!](repos.txt)
+The list of repositories that this sets up is located in [repos.txt](repos.txt)
 
 # Getting Started
-First, Fork this repository and all repositories in the [repos.txt!](repos.txt) file.
+First, [Fork this repository](https://github.com/beyond-z/development#fork-destination-box) **and** all repositories in the [repos.txt](repos.txt) file.
 
 Then, setup your local development environment
  ```Shell 
@@ -24,10 +24,10 @@ All services are available at the ```VIRTUAL_HOST``` specified in
 By default, the build scripts add two users:
 * join.admin@bebraven.org - access to the Join server's admin dashboard
 * admin@beyondz.org - access to the Canvas admin account
-Note: at the time of writing, if you don't specify admin@beyondz.org
-as the Canvas admin when running ./setup.bat then you have to login with
-whatever account you did create at
-http://canvas.docker/login?canvas_login=1 and add that user.
+   Note: at the time of writing, if you don't specify admin@beyondz.org
+   as the Canvas admin when running ./setup.bat then you have to login with
+   whatever account you did create at
+   http://canvas.docker/login?canvas_login=1 and add that user.
 
 # Tips and Tricks
 ## Development
@@ -65,11 +65,11 @@ git checkout staging; git pull upstream staging; git branch -d
 ## Docker
 Each repository has some helpful scripts to interact with your local
 service using docker in ```[some_repo]/docker-compose/scripts```.  E.g.
-you can restart the ```canvas-lms``` server using
-```canvas-lms/docker-compose/scripts/restart.bat```
+you can restart the ```canvas-lms``` server using ```canvas-lms/docker-compose/scripts/restart.bat```
 
 You can run the same commands directly using ```docker``` and ```docker-compose```.
 Note: all service names are located in [docker-compose.yml](docker-compose.yml) E.g. the Join web server service is named ```joinweb```
+
 Here are some examples:
 * See the status of your containers: ```docker ps```
 * Get the server logs from a service: ```docker-compose logs
