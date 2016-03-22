@@ -45,6 +45,9 @@ joindb:
 ######################
 canvasdb:
   image: postgres:9.3
+  environment:
+    POSTGRES_USER: canvas
+    POSTGRES_DB: canvas
 
 canvasredis:
   image: redis:2.6

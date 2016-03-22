@@ -91,6 +91,24 @@ if [ "$(uname)" == "Darwin" ]; then
     brew install docker-compose --without-boot2docker || { echo >&2 "Error: brew install docker-compose --without-boot2docker failed!"; exit 1; }
   fi
 
+  if ! aws --version 2> /dev/null; then
+    # Install AWS CLI if it's not there
+    echo "Error: Please install 'aws'. E.g."
+    echo "  $ sudo easy_install awscli"
+    echo "OR"
+    echo "  $ curl \"https://s3.amazonaws.com/aws-cli/awscli-bundle.zip\" -o \"awscli-bundle.zip\""
+    echo "  $ unzip awscli-bundle.zip"
+    echo "  $ sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws"
+    echo ""
+    echo "You must run 'aws configure' after to setup permissions."
+    exit 1;
+  fi
+
+
+  # This file changes locally in the dev env.  We need it in src ctrl for Travis 
+  # to work but we want to ignore local changes.
+  (cd $join_src_path && git update-index --assume-unchanged config/database.yml)
+
   cp -a ./beyondz-platform/docker-compose/config/* ./beyondz-platform/config/
   cp -a ./beyondz-platform/docker-compose/db/seeds.rb ./beyondz-platform/db/
   cp -a ./canvas-lms/docker-compose/config/* ./canvas-lms/config/
@@ -99,18 +117,19 @@ if [ "$(uname)" == "Darwin" ]; then
   #docker-compose build --no-cache || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
   docker-compose build || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
 
-  #####
-  #TODO: pull staging database instead of using the follow rake commands
-  ####
-
   echo "Setting up Join development environment at: $join_src_path"
   cd $join_src_path
-  docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:reset;" # Same as a db:create; db:migrate; db:seed, but also drops the DB first.
-  if [ $? -ne 0 ]
-  then
-     echo "Error: could not setup Join database."
-     exit 1;
-  fi
+
+  # Load a dev database with real info (uses the most recent staging refresh db migrated to a dev db)
+  aws s3 sync s3://beyondz-db-dumps/ db --exclude "*" --include "join_dev_db_dump_*"
+  # db:load_dev expects the file to be located here:
+  mv db/join_dev_db_dump_* db/dev_db.sql.gz
+  docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:load_dev;" || { echo >&2 "Error: failed to load dev db."; exit 1; }
+  # Necessary b/c the development RAILS_SECRET is different so we have to regenerate the password hashes
+  docker-compose run --rm joinweb /bin/bash -c "bundle exec rails runner \"eval(File.read '/app/docker-compose/scripts/sanitize_passwords.rb')\"" || { echo >&2 "Error: failed to sanitize passworids in dev db."; exit 1; }
+  # If you want to just use an empty database, you can replace the above steps to load the dev db with this:
+  #docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:reset;" # Same as a db:create; db:migrate; db:seed, but also drops the DB first.
+
 
   echo "Setting up Canvas/Portal development environment at: $canvas_src_path"
   cd $canvas_src_path
@@ -118,15 +137,16 @@ if [ "$(uname)" == "Darwin" ]; then
   docker-compose run --rm canvasweb /bin/bash -c "bundle install" || { echo >&2 "Error: bundle install failed."; exit 1; }
   docker-compose run --rm canvasweb /bin/bash -c "npm install" || { echo >&2 "Error: npm install failed"; exit 1; }
 
-  #####
-  #TODO: pull staging database instead of using rake db:initial_setup script
-  ####
-  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:create; bundle exec rake db:migrate; echo 'Choose whatever email/password/name you want for your local Canvas'; bundle exec rake db:initial_setup;"
-  if [ $? -ne 0 ]
-  then
-     echo "Error: could not setup Canvas database."
-     exit 1;
-  fi
+  # Load a dev database with real info (uses the most recent staging refresh db migrated to a dev db)
+  # Note: the access tokens, URLs, etc have been updated for use with dev.  The Join configuration has been
+  # set to match.
+  aws s3 sync s3://beyondz-db-dumps/ db --exclude "*" --include "lms_dev_db_dump_*"
+  # db:load_dev expects the file to be located here:
+  mv db/lms_dev_db_dump_* db/dev_db.sql.gz
+  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:reset_encryption_key_hash;" # Required for a second run
+  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:load_dev;" || { echo >&2 "Error: failed to load dev db."; exit 1; }
+  # If you want to just use an empty database, you can replace the above steps to load the dev db with this:
+  #docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:create; bundle exec rake db:migrate; echo 'Choose whatever email/password/name you want for your local Canvas'; bundle exec rake db:initial_setup;"
 
   docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake canvas:compile_assets" || { echo >&2 "Error: bundle exec rake canvas:compile_assets failed."; exit 1; }
 
