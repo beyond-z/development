@@ -5,3 +5,5 @@
 while read repo_name; do
   (cd $repo_name && echo "`pwd`  ------------- " && git $@)
 done < repos.txt
+
+echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )  ------------- " && git $@
