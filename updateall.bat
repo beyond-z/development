@@ -9,5 +9,9 @@ echo "Updating beyondz-platform  ------------- "
 (cd beyondz-platform; git checkout staging; git pull upstream staging; git push origin staging;)
 echo "Updating canvas-lms  ------------- "
 (cd canvas-lms; git checkout bz-staging; git pull upstream bz-staging; git push origin bz-staging;)
+echo "Updating canvas-lms-js-css  ------------- "
+(cd canvas-lms-js-css; git checkout staging; git pull upstream staging; git push origin staging;)
 echo "Updating osqa  ------------- "
 (cd osqa; git checkout master; git pull upstream master; git push origin master;)
+echo "Updating development ------------- "
+git checkout master; git pull upstream master; git push origin master;
