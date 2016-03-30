@@ -3,4 +3,5 @@ rubycas-server
 braven
 beyondz-platform
 canvas-lms
+canvas-lms-js-css
 osqa

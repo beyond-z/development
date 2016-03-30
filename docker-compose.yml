@@ -110,3 +110,18 @@ canvasguard:
     - "./canvas-lms:/app"
   environment:
     RACK_ENV: development
+
+
+######################
+## Custom CSS/JS served using lightweight static web-server
+######################
+cssjsweb:
+  build: ./canvas-lms-js-css
+  command: static --host-address 0.0.0.0 -p 3003 --gzip
+  volumes:
+    - "./canvas-lms-js-css:/app"
+  ports:
+    - "3003:3003"
+  environment:
+    VIRTUAL_HOST: cssjs.docker
+
