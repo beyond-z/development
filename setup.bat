@@ -31,6 +31,7 @@ bash_src_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 join_src_path="$( cd $bash_src_path; cd beyondz-platform && pwd )"
 canvas_src_path="$( cd $bash_src_path; cd canvas-lms && pwd )"
 sso_src_path="$( cd $bash_src_path; cd rubycas-server && pwd )"
+braven_src_path="$( cd $bash_src_path; cd braven && pwd )"
 
 vboxmanage --version &> /dev/null || { echo >&2 "VirtualBox not installed.  Please install it first"; exit 1; }
 vboxmanage list extpacks &> /dev/null || { echo >&2 "VirtualBox Extension pack not installed.  Please install it first"; exit 1; }
@@ -113,6 +114,7 @@ if [ "$(uname)" == "Darwin" ]; then
   cp -a ./beyondz-platform/docker-compose/db/seeds.rb ./beyondz-platform/db/
   cp -a ./canvas-lms/docker-compose/config/* ./canvas-lms/config/
   cp -a ./rubycas-server/docker-compose/config/* ./rubycas-server/config/
+  cp -a ./braven/docker-compose/config/wp-config.php ./braven/wp-config.php
 
   #docker-compose build --no-cache || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
   docker-compose build || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
@@ -152,6 +154,25 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Setting up SSO development environment at: $sso_src_path"
   cd $sso_src_path
+
+  echo "Setting up Braven development environment at: $braven_src_path"
+  cd $braven_src_path
+
+  # Load a dev database with real info (uses the most recent production db migrated to a dev db)
+  # Note: the URLs, passwords, etc have been updated for use with dev before they were uploaded to
+  # the S3 bucket using the braven/docker-compose/scripts/migrate_prod_db.bat script on the updraftplus DB backup.
+  # Also, the braven-wp-content*.zip file was created to mimic the wp-content folder 
+  # using the updraftplus backups on dropbox (/<BeyondZ Dropbox>/Apps/UpdraftPlus/BeBraven
+  tmp_dir=docker-compose/tmp
+  mkdir $tmp_dir
+  rm $tmp_dir/braven*
+  aws s3 sync s3://beyondz-db-dumps/ $tmp_dir --exclude "*" --include "braven-*"
+  mv $tmp_dir/braven-wp-content*.zip $tmp_dir/braven-wp-content.zip
+  unzip -o $tmp_dir/braven-wp-content.zip || { echo >&2 "Error: failed extracting braven-wp-content.zip pulled from Amazon S3 into wp-content folder"; exit 1; }
+  mv $tmp_dir/braven-dev-db*.gz $tmp_dir/braven-dev-db.gz
+  gzip -cd $tmp_dir/braven-dev-db.gz | docker-compose run --rm bravendb mysql -h bravendb -u wordpress "-pwordpress" wordpress || { echo >&2 "Error: failed loading development db for braven"; exit 1; }
+  rm -rf $tmp_dir
+  echo "http://braven.docker/wp-admin username/password is: beyondz/test1234"
 
   # OK, we're all set.  Let's start this bad boy.
   docker-compose up -d || { echo >&2 "Error: docker-compose up failed. A possible cause is that files use Windows newlines \(CRLF\). Check that all files in the docker-compose directory use Unix newlines \(LF\)."; exit 1; }
