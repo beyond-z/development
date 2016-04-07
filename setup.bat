@@ -169,6 +169,7 @@ if [ "$(uname)" == "Darwin" ]; then
   aws s3 sync s3://beyondz-db-dumps/ $tmp_dir --exclude "*" --include "braven-*"
   mv $tmp_dir/braven-wp-content*.zip $tmp_dir/braven-wp-content.zip
   unzip -o $tmp_dir/braven-wp-content.zip || { echo >&2 "Error: failed extracting braven-wp-content.zip pulled from Amazon S3 into wp-content folder"; exit 1; }
+  find ./wp-content -type f -print0 | xargs -0 chmod 644
   mv $tmp_dir/braven-dev-db*.gz $tmp_dir/braven-dev-db.gz
   gzip -cd $tmp_dir/braven-dev-db.gz | docker-compose run --rm bravendb mysql -h bravendb -u wordpress "-pwordpress" wordpress || { echo >&2 "Error: failed loading development db for braven"; exit 1; }
   rm -rf $tmp_dir
