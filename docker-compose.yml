@@ -125,23 +125,6 @@ cssjsweb:
   environment:
     VIRTUAL_HOST: cssjs.docker
 
-#######################
-### Braven Help
-#######################
-#helpweb:
-#  build: ./osqa
-#  command: TODO
-#  volumes:
-#    - "./osqa:/app"
-#  ports:
-#    - "3004:3004"
-#  environment:
-#    VIRTUAL_HOST: help.docker
-#
-#helpdb:
-#  image: postgres:9.4.6
-#  environment:
-#    POSTGRES_DB: TODO
 
 #######################
 ### Public facing Braven.org site
