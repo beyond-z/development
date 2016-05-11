@@ -125,33 +125,12 @@ cssjsweb:
   environment:
     VIRTUAL_HOST: cssjs.docker
 
-
-#######################
-### Public facing Braven.org site
-#######################
-bravenweb:
-  image: wordpress
-  command: /var/www/html/docker-compose/scripts/run.bat
-  volumes:
-    - "./braven:/var/www/html"
-  links:
-    - bravendb
-  ports:
-    - "3005:3005"
-  environment:
-    WORDPRESS_DB_HOST: bravendb
-    WORDPRESS_DB_USER: wordpress
-    WORDPRESS_DB_PASSWORD: wordpress
-    WORDPRESS_DB_NAME: wordpress
-    VIRTUAL_HOST: braven.docker
-    VIRTUAL_PORT: 3005
-
-bravendb:
-  image: mysql:5.5.44
-  environment:
-    MYSQL_ROOT_PASSWORD: wordpress
-    MYSQL_USER: wordpress
-    MYSQL_PASSWORD: wordpress
-    MYSQL_DATABASE: wordpress
-    #MYSQL_ALLOW_EMPTY_PASSWORD: yes
-
+# ------------------------------------
+######################################
+######################################
+# Running all these services is resource intensive, so by default we don't start
+# the Braven public website and Braven Help.  If you are developing something for one of those,
+# just use startall.bat instead of start.bat to start your local development environment.
+######################################
+######################################
+# ------------------------------------
