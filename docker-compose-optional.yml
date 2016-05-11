@@ -1,0 +1,57 @@
+# IMPORTANT NOTE:
+# This docker-compose configuration is only for the Braven public website
+# and Braven Help.  It is setup and started using startall.bat.  To start
+# only the Portal, Join Server, SSO server use docker-compose.yml instead.
+
+
+#######################
+### Public facing Braven.org site
+#######################
+bravenweb:
+  image: wordpress
+  command: /var/www/html/docker-compose/scripts/run.bat
+  volumes:
+    - "./braven:/var/www/html"
+  links:
+    - bravendb
+  ports:
+    - "3005:3005"
+  environment:
+    WORDPRESS_DB_HOST: bravendb
+    WORDPRESS_DB_USER: wordpress
+    WORDPRESS_DB_PASSWORD: wordpress
+    WORDPRESS_DB_NAME: wordpress
+    VIRTUAL_HOST: braven.docker
+    VIRTUAL_PORT: 3005
+
+bravendb:
+  image: mysql:5.5.44
+  environment:
+    MYSQL_ROOT_PASSWORD: wordpress
+    MYSQL_USER: wordpress
+    MYSQL_PASSWORD: wordpress
+    MYSQL_DATABASE: wordpress
+    #MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+#######################
+###  OSQA (aka Braven Help)
+#######################
+helpweb:
+  build: ./osqa
+  command: /app/docker-compose/scripts/run.bat
+  volumes:
+    - "./osqa:/app"
+  links:
+    - helpdb
+  ports:
+    - "3006:3006"
+  environment:
+    VIRTUAL_HOST: help.docker
+    VIRTUAL_PORT: 3006
+
+helpdb:
+  image: postgres:9.3
+  environment:
+    POSTGRES_DB: osqa
+    POSTGRES_USER: root
+
