@@ -21,8 +21,8 @@ All services are available at the ```VIRTUAL_HOST``` specified in
 * Canvas is at [http://canvas.docker](http://canvas.docker)
 * Join is at [http://join.docker](http://join.docker)
 * Single Sign-on is at [http://sso.docker](http://sso.docker)
-* Public facing Braven website is at [http://braven.docker]
-* Braven Help is at [http://help.docker]
+* Public facing Braven website is at [http://braven.docker](http://braven.docker)
+* Braven Help is at [http://help.docker](http://help.docker)
 
 The two main admin users to be aware of are the following.  Ask your team-mate what the passwords are.
 * join.admin@bebraven.org - access to the Join server's admin dashboard.  Login [here](http://join.docker/admin).
