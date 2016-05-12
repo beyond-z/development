@@ -62,7 +62,7 @@ git checkout staging; git pull upstream staging; git branch -d
 [some_branch]
 ```
 ## Docker
-There are two modes to setup your Docker development environment.  ```setup.bat``` and ```start.bat``` only setup the basic services.  However, if you want to develop something on the public Braven website or Braven Help, use ```setupall.bat``` and ```startall.bat```.  This is done because running all the services is very resource intensive on your machine.  In fact, the development environment is so resource intensive that you probably want to run ```stop.bat``` when you are not actively developing and then ```start.bat``` when you are ready to work again.
+There are two modes to setup your Docker development environment.  The default lightweight environment uses ```setup.bat``` and ```start.bat``` which only setup and start the basic services.  However, if you want to develop something on the public Braven website or Braven Help, use ```setupall.bat``` and ```startall.bat``` to run the full dev env.  This is done because running all the services is very resource intensive on your machine.  In fact, the development environment is so resource intensive that you probably want to run ```stop.bat``` when you are not actively developing and then ```start.bat``` when you are ready to work again.
 
 Each repository has some helpful scripts to interact with your local
 service using docker in ```[some_repo]/docker-compose/scripts```.  E.g.
