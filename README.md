@@ -6,12 +6,13 @@ The list of repositories that this sets up is located in [repos.txt](repos.txt)
 # Getting Started
 First, [Fork this repository](https://github.com/beyond-z/development#fork-destination-box) **and** all repositories in the [repos.txt](repos.txt) file.
 
-Then, setup your local development environment
+Ask your team lead to setup an AWS account that can access the proper development S3 buckets.  Once you have an account created then setup your local development environment using the commands below.  Note: the first time it will fail with instructions on how to configure your AWS account.
  ```Shell 
 cd [some_root_src_dir]
 git clone https://github.com/[your_username]/development.git development
 cd development
 ./setup.bat
+./start.bat
 ```
 
 # Connecting to services
@@ -20,14 +21,12 @@ All services are available at the ```VIRTUAL_HOST``` specified in
 * Canvas is at [http://canvas.docker](http://canvas.docker)
 * Join is at [http://join.docker](http://join.docker)
 * Single Sign-on is at [http://sso.docker](http://sso.docker)
+* Public facing Braven website is at [http://braven.docker]
+* Braven Help is at [http://help.docker]
 
-By default, the build scripts add two users:
-* join.admin@bebraven.org - access to the Join server's admin dashboard
-* admin@beyondz.org - access to the Canvas admin account
-   Note: at the time of writing, if you don't specify admin@beyondz.org
-   as the Canvas admin when running ./setup.bat then you have to login with
-   whatever account you did create at
-   http://canvas.docker/login?canvas_login=1 and add that user.
+The two main admin users to be aware of are the following.  Ask your team-mate what the passwords are.
+* join.admin@bebraven.org - access to the Join server's admin dashboard.  Login [here](http://join.docker/admin).
+* admin@beyondz.org - access to the Portal admin account.  Login [here](http://canvas.docker)
 
 # Tips and Tricks
 ## Development
@@ -63,6 +62,8 @@ git checkout staging; git pull upstream staging; git branch -d
 [some_branch]
 ```
 ## Docker
+There are two modes to setup your Docker development environment.  ```setup.bat``` and ```start.bat``` only setup the basic services.  However, if you want to develop something on the public Braven website or Braven Help, use ```setupall.bat``` and ```startall.bat```.  This is done because running all the services is very resource intensive on your machine.  In fact, the development environment is so resource intensive that you probably want to run ```stop.bat``` when you are not actively developing and then ```start.bat``` when you are ready to work again.
+
 Each repository has some helpful scripts to interact with your local
 service using docker in ```[some_repo]/docker-compose/scripts```.  E.g.
 you can restart the ```canvas-lms``` server using ```canvas-lms/docker-compose/scripts/restart.bat```
