@@ -1,0 +1,67 @@
+# IMPORTANT NOTE:
+# This docker-compose configuration is only for 
+# the Braven Join server with SSO login.  Assuming you have run setup.bat once, you can
+# start these services using the following commands:
+# dinghy up
+# docker-compose -f ./docker-compose-join.yml up -d
+
+# If your database or configs are out of date, these are the setup commands to re-run:
+# cp -a ./beyondz-platform/docker-compose/config/* ./beyondz-platform/config/
+# cp -a ./beyondz-platform/docker-compose/db/seeds.rb ./beyondz-platform/db/
+# cp -a ./rubycas-server/docker-compose/config/* ./rubycas-server/config/
+# docker-compose -f ./docker-compose-join.yml build
+# cd beyondz-platform
+# aws s3 sync s3://beyondz-db-dumps/ db --exclude "*" --include "join_dev_db_dump_*"
+# mv db/join_dev_db_dump_* db/dev_db.sql.gz
+# docker-compose -f ../docker-compose-join.yml run --rm joinweb /bin/bash -c "bundle exec rake db:load_dev;"
+# docker-compose -f ../docker-compose-join.yml run --rm joinweb /bin/bash -c "bundle exec rails runner \"eval(File.read '/app/docker-compose/scripts/sanitize_passwords.rb')\""
+# docker-compose -f ../docker-compose-join.yml run --rm joinweb /bin/bash -c "bundle exec rake db:migrate;"
+# cd ..
+# docker-compose -f ./docker-compose-join.yml up -d
+#
+# Setup tcp port forwarding on localhost so that http://localhost:3001 goes to http://join.docker:3001
+# This is needed for Salesforce to be configured to accept connections.
+# Note: you need to be running a local ssh server.  On a Mac, go to System Preferences -> Sharing and check the box for remote login.
+# ssh -L localhost:3001:join.docker:3001 -N 127.0.0.1#
+
+#######################
+## SSO server
+######################
+ssoweb:
+  build: ./rubycas-server
+  command: bundle exec rubycas-server -p 3002 -c config/config.yml
+  volumes:
+    - "./rubycas-server:/app"
+  ports:
+    - "3002:3002"
+  links:
+    - ssodb
+  environment:
+    RACK_ENV: development
+    VIRTUAL_HOST: sso.docker
+
+ssodb:
+  image: postgres:9.3
+  environment:
+    POSTGRES_DB: casserver
+
+######################
+## Join server
+######################
+joinweb:
+  build: ./beyondz-platform
+  command: /app/docker-compose/scripts/run.bat
+  volumes:
+    - "./beyondz-platform:/app"
+  ports:
+    - "3001:3001"
+  links:
+    - joindb
+  environment:
+    RACK_ENV: development
+    VIRTUAL_HOST: join.docker
+  env_file: ./beyondz-platform/docker-compose/.env-docker
+
+joindb:
+  image: postgres:9.3
+
