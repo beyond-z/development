@@ -55,8 +55,6 @@ if [ "$(uname)" == "Darwin" ]; then
     exit 1;
   fi
 
-  echo "TODO: add cssjsweb, canvasweb, ssoweb, and joinweb to /etc/hosts"
-
   echo "Checking if the AWS ENV vars are setup"
   if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
     echo "The AWS ENV vars arent setup. TODO: add these to your .bash_profile"
@@ -93,6 +91,26 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Loading a dev DB into your Portal dev env"
   (cd $canvas_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+
+  if ! grep -q "^[^#].*joinweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     joinweb" >> /etc/hosts'''
+  fi
+
+  if ! grep -q "^[^#].*ssoweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     ssoweb" >> /etc/hosts'''
+  fi
+
+  if ! grep -q "^[^#].*canvasweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     canvasweb" >> /etc/hosts'''
+  fi
+
+  if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
+  fi
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   # GNU/Linux platform
