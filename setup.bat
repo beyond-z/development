@@ -15,10 +15,12 @@ fi
 
 origin_url=${current_repo%development.git}
 while read repo_name; do
-  if [ -d $repo_name/.git ]; then
-    echo "Skipping clone of $repo_name because it already exists"
-  elif if [[ $repo_name = #* ]]
+  if [[ $repo_name =~ ^# ]]; then 
     # Skip comments
+    continue;
+  elif [ -d $repo_name/.git ]; then
+    echo "Skipping clone of $repo_name because it already exists"
+    # TODO: run a git pull upstream command so that it's using the latest code.
   else
     clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
     echo "Running: $clone_cmd_to_run"
@@ -42,10 +44,12 @@ if [ "$(uname)" == "Darwin" ]; then
 
   docker -v &> /dev/null || { echo >&2 "Error: somethings wrong with docker. Go download Docker For Mac from dockerhub (you have to create an account) and make sure docker -v works"; exit 1; }
 
-  if ! aws --version 2> /dev/null; then
+  if ! aws --version &> /dev/null; then
     # Install AWS CLI if it's not there
     echo "Error: Please install 'aws'. E.g."
-    echo "  $ pip3 install awscli
+    echo "  $ pip3 install awscli"
+    echo ""
+    echo "If you don't have pip3, download and install Python 3x which has it: https://www.python.org/ftp/python/3.7.4/python-3.7.4-macosx10.9.pkg"
     echo ""
     echo "You MUST run 'aws configure' after to setup permissions, putting in your IAM Access and Secret Tokens. Use us-west-1 for the region."
     exit 1;
@@ -66,7 +70,7 @@ if [ "$(uname)" == "Darwin" ]; then
   echo "Setting up Canvas JS/CSS development environment at: $canvasjscss_src_path"
   (cd $canvasjscss_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  echo "Setting up SSO (aka rubycas-server development environment at: $sso_src_path"
+  echo "Setting up SSO, aka rubycas-server development environment at: $sso_src_path"
   (cd $sso_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
   echo "Setting up Join development environment at: $join_src_path"
@@ -76,19 +80,19 @@ if [ "$(uname)" == "Darwin" ]; then
   # to work but we want to ignore local changes.
   #(cd $join_src_path && git update-index --assume-unchanged config/database.yml)
 
-  (cd $join_src_path && && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
+  (cd $join_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
   echo "Setting up Portal aka Canvas/LMS development environment at: $canvas_src_path"
   (cd $canvas_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  echo "Setting up nginx-dev service so we don't have to use port numbers in the dev environment at: $nginx_dev_src_path"
+  echo "Setting up nginx-dev service so we dont have to use port numbers in the dev environment at: $nginx_dev_src_path"
   (cd $nginx_dev_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
   echo "Loading a dev DB into your Join dev env"
-  (cd $join_src_path && && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+  (cd $join_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
   echo "Loading a dev DB into your Portal dev env"
-  (cd $canvas_src_path && && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+  (cd $canvas_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   # GNU/Linux platform
