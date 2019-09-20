@@ -1,5 +1,6 @@
+# This was an old script to setup the braven and osqa repos. Leaving this here for now until 
+# we get a Braven Dot Org docker env going with the new stuff.
 #!/bin/bash
-
 ./setup.bat
 
 braven_src_path="$( cd $bash_src_path; cd braven && pwd )"
@@ -31,7 +32,7 @@ if [ "$(uname)" == "Darwin" ]; then
   mv $tmp_dir/braven-dev-db*.gz $tmp_dir/braven-dev-db.gz
   gzip -cd $tmp_dir/braven-dev-db.gz | docker-compose run --rm bravendb mysql -h bravendb -u wordpress "-pwordpress" wordpress || { echo >&2 "Error: failed loading development db for braven"; exit 1; }
   rm -rf $tmp_dir
-  echo "http://braven.docker/wp-admin username/password is: beyondz/test1234"
+  echo "http://braven.docker/wp-admin username/password is: beyondz/[normal test pass]"
 
   echo "Setting up OSQA development environment at: $osqa_src_path"
   cd $osqa_src_path

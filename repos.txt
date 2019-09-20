@@ -1,9 +1,14 @@
-salesforce
 rubycas-server
-braven
 beyondz-platform
 canvas-lms
 canvas-lms-js-css
-analytics
-osqa
-kits
+nginx-dev
+#
+# TODO: get these next ones going after the above ones work (if we plan to keep using them)
+#kits
+#braven_2
+#salesforce
+#career-mgr
+#datacentral
+#analytics
+#osqa

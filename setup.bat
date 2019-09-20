@@ -15,8 +15,12 @@ fi
 
 origin_url=${current_repo%development.git}
 while read repo_name; do
-  if [ -d $repo_name/.git ]; then
+  if [[ $repo_name =~ ^# ]]; then 
+    # Skip comments
+    continue;
+  elif [ -d $repo_name/.git ]; then
     echo "Skipping clone of $repo_name because it already exists"
+    # TODO: run a git pull upstream command so that it's using the latest code.
   else
     clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
     echo "Running: $clone_cmd_to_run"
@@ -30,143 +34,83 @@ done < repos.txt
 bash_src_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 join_src_path="$( cd $bash_src_path; cd beyondz-platform && pwd )"
 canvas_src_path="$( cd $bash_src_path; cd canvas-lms && pwd )"
+canvasjscss_src_path="$( cd $bash_src_path; cd canvas-lms-js-css && pwd )"
 sso_src_path="$( cd $bash_src_path; cd rubycas-server && pwd )"
-
-vboxmanage --version &> /dev/null || { echo >&2 "VirtualBox not installed.  Please install it first"; exit 1; }
-vboxmanage list extpacks &> /dev/null || { echo >&2 "VirtualBox Extension pack not installed.  Please install it first"; exit 1; }
+nginx_dev_src_path="$( cd $bash_src_path; cd nginx-dev && pwd )"
 
 if [ "$(uname)" == "Darwin" ]; then
   # OS X platform
   echo "Setting up Docker VM for Mac"
 
-  if ! dinghy version &> /dev/null; then
-    echo "Installing dinghy"
-    git clone https://github.com/codekitchen/dinghy.git ../dinghy
-    if [ $? -ne 0 ]
-    then
-     echo "Failed cloning dinghy source code"
-     exit 1;
-    fi
-    cd ../dinghy
-    brew update || { echo >&2 "Error: brew update failed!"; exit 1; }
+  docker -v &> /dev/null || { echo >&2 "Error: somethings wrong with docker. Go download Docker For Mac from dockerhub (you have to create an account) and make sure docker -v works"; exit 1; }
 
-    brew tap codekitchen/dinghy
-    brew install dinghy
-    # TODO: there is a bug in the stable dinghy that prevents the http proxy from working.  Using master to fix it.
-    # See: https://github.com/codekitchen/dinghy/issues/135
-    # Revert to stable version once it's fixed there.
-    #brew install --HEAD dinghy
-    if [ $? -ne 0 ]
-    then
-     echo "Failed installing dinghy to $(pwd)"
-     exit 1;
-    fi
-    brew install docker docker-machine || { echo >&2 "Error: brew install docker docker-machine failed!"; exit 1; }
-
-    dingyoutput="$(dinghy create --memory=4096 --cpus=4 --provider=virtualbox)"
-    if [ $? -ne 0 ]
-    then
-     echo "Failed creating dinghy VM: dinghy create --memory=4096 --cpus=4 --provider=virtualbox"
-     exit 1;
-    fi
-
-    # TODO!!! grab the ENV variables output by dinghy create and add them to .bashrc
-    # e.g. 
-    # export DOCKER_HOST=tcp://192.168.99.100:2376
-    # export DOCKER_CERT_PATH=/Users/sadleb/.docker/machine/machines/dinghy
-    # export DOCKER_TLS_VERIFY=1
-    # export DOCKER_MACHINE_NAME=dinghy
-
-    read response $'Please add the above ENV variables to your ~/.bashrc and hit Enter'
-    source ~/.bashrc
-
-    echo "Installed dinghy to $(pwd)"
-  fi
-
-  dinghy up || { echo >&2 "Error: dinghy up failed."; exit 1; }
-  docker ps &> /dev/null || { echo >&2 "Error: somethings wrong with docker.  Make sure this command lists your containers: docker ps"; exit 1; }
-
-  if ! docker-compose --version &> /dev/null; then
-    echo "Installing docker-compose"
-    brew install docker-compose --without-boot2docker || { echo >&2 "Error: brew install docker-compose --without-boot2docker failed!"; exit 1; }
-  fi
-
-  if ! aws --version 2> /dev/null; then
+  if ! aws --version &> /dev/null; then
     # Install AWS CLI if it's not there
     echo "Error: Please install 'aws'. E.g."
-    echo "  $ sudo easy_install awscli"
-    echo "OR"
-    echo "  $ curl \"https://s3.amazonaws.com/aws-cli/awscli-bundle.zip\" -o \"awscli-bundle.zip\""
-    echo "  $ unzip awscli-bundle.zip"
-    echo "  $ sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws"
+    echo "  $ pip3 install awscli"
     echo ""
-    echo "You must run 'aws configure' after to setup permissions."
+    echo "If you don't have pip3, download and install Python 3x which has it: https://www.python.org/ftp/python/3.7.4/python-3.7.4-macosx10.9.pkg"
+    echo ""
+    echo "You MUST run 'aws configure' after to setup permissions, putting in your IAM Access and Secret Tokens. Use us-west-1 for the region."
     exit 1;
   fi
 
+  echo "Checking if the AWS ENV vars are setup"
+  if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+    echo "The AWS ENV vars arent setup. TODO: add these to your .bash_profile"
+    echo '  export AWS_ACCESS_KEY_ID=<yourkey>'
+    echo '  export AWS_SECRET_ACCESS_KEY=<yoursecretkey>'
+    exit 1
+  else
+    echo "You good!"
+  fi
 
-  # This file changes locally in the dev env.  We need it in src ctrl for Travis 
-  # to work but we want to ignore local changes.
-  (cd $join_src_path && git update-index --assume-unchanged config/database.yml)
+  echo "Setting up Canvas JS/CSS development environment at: $canvasjscss_src_path"
+  (cd $canvasjscss_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  cp -a ./beyondz-platform/docker-compose/config/* ./beyondz-platform/config/
-  cp -a ./beyondz-platform/docker-compose/db/seeds.rb ./beyondz-platform/db/
-  cp -a ./canvas-lms/docker-compose/config/* ./canvas-lms/config/
-  cp -a ./rubycas-server/docker-compose/config/* ./rubycas-server/config/
-
-  #docker-compose build --no-cache || { echo >&2 "Error: docker-compose build --no-cache failed."; exit 1; }
-  docker-compose build || { echo >&2 "Error: docker-compose build failed."; exit 1; }
+  echo "Setting up SSO, aka rubycas-server development environment at: $sso_src_path"
+  (cd $sso_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
   echo "Setting up Join development environment at: $join_src_path"
-  cd $join_src_path
 
-  # Load a dev database with real info (uses the most recent staging refresh db migrated to a dev db)
-  aws s3 sync s3://beyondz-db-dumps/ db --exclude "*" --include "join_dev_db_dump_*"
-  # db:load_dev expects the file to be located here:
-  mv db/join_dev_db_dump_* db/dev_db.sql.gz
-  docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:load_dev;" || { echo >&2 "Error: failed to load dev db."; exit 1; }
-  # Necessary b/c the development RAILS_SECRET is different so we have to regenerate the password hashes
-  docker-compose run --rm joinweb /bin/bash -c "bundle exec rails runner \"eval(File.read '/app/docker-compose/scripts/sanitize_passwords.rb')\"" || { echo >&2 "Error: failed to sanitize passworids in dev db."; exit 1; }
-  # If you want to just use an empty database, you can replace the above steps to load the dev db with this:
-  #docker-compose run --rm joinweb /bin/bash -c "bundle exec rake db:reset;" # Same as a db:create; db:migrate; db:seed, but also drops the DB first.
+  # TODO: verify this is still necessary and either remove or uncomment.
+  # This file changes locally in the dev env.  We need it in src ctrl for Travis 
+  # to work but we want to ignore local changes.
+  #(cd $join_src_path && git update-index --assume-unchanged config/database.yml)
 
+  (cd $join_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  echo "Setting up Canvas/Portal development environment at: $canvas_src_path"
-  cd $canvas_src_path
+  echo "Setting up Portal aka Canvas/LMS development environment at: $canvas_src_path"
+  (cd $canvas_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  docker-compose run --rm canvasweb /bin/bash -c "bundle install" || { echo >&2 "Error: bundle install failed."; exit 1; }
-  docker-compose run --rm canvasweb /bin/bash -c "npm install" || { echo >&2 "Error: npm install failed"; exit 1; }
+  echo "Setting up nginx-dev service so we dont have to use port numbers in the dev environment at: $nginx_dev_src_path"
+  (cd $nginx_dev_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
-  # Load a dev database with real info (uses the most recent staging refresh db migrated to a dev db)
-  # Note: the access tokens, URLs, etc have been updated for use with dev.  The Join configuration has been
-  # set to match.
-  aws s3 sync s3://beyondz-db-dumps/ db --exclude "*" --include "lms_dev_db_dump_*"
-  # db:load_dev expects the file to be located here:
-  mv db/lms_dev_db_dump_* db/dev_db.sql.gz
-  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:reset_encryption_key_hash;" # Required for a second run
-  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:load_dev;" || { echo >&2 "Error: failed to load dev db."; exit 1; }
-  # If you want to just use an empty database, you can replace the above steps to load the dev db with this:
-  #docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake db:create; bundle exec rake db:migrate; echo 'Choose whatever email/password/name you want for your local Canvas'; bundle exec rake db:initial_setup;"
+  echo "Loading a dev DB into your Join dev env"
+  (cd $join_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
-  docker-compose run --rm canvasweb /bin/bash -c "bundle exec rake canvas:compile_assets" || { echo >&2 "Error: bundle exec rake canvas:compile_assets failed."; exit 1; }
+  echo "Loading a dev DB into your Portal dev env"
+  (cd $canvas_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
-  echo "Setting up SSO development environment at: $sso_src_path"
-  cd $sso_src_path
+  if ! grep -q "^[^#].*joinweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     joinweb" >> /etc/hosts'''
+  fi
 
-  # ------------------------------------------------
-  ##################################################
-  ##################################################
-  # Running all the services is resource intensive, so by default we don't setup / start
-  # the Braven public website and Braven Help.  If you are developing something for one of those,
-  # just use setupall.bat instead of setup.bat and startall.bat instead of start.bat to start your
-  # local development environment.
-  ##################################################
-  ##################################################
-  # ------------------------------------------------
+  if ! grep -q "^[^#].*ssoweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     ssoweb" >> /etc/hosts'''
+  fi
 
-  # OK, we're all set.  Let's start this bad boy.
-  docker-compose up -d || { echo >&2 "Error: docker-compose up failed. A possible cause is that files use Windows newlines \(CRLF\). Check that all files in the docker-compose directory use Unix newlines \(LF\)."; exit 1; }
+  if ! grep -q "^[^#].*canvasweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     canvasweb" >> /etc/hosts'''
+  fi
 
+  if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
+  fi
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   # GNU/Linux platform
@@ -178,4 +122,4 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
   exit 1;
 fi
 
-echo "Setup complete!  Please start a new shell to get your environment variables"
+echo "Setup complete!"
