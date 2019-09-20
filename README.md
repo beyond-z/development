@@ -14,20 +14,13 @@ cd development
 ./setup.bat
 ```
 
-# OBSOLETE FROM HERE ON DOWN. UPDATE ME!!
-
 # Connecting to services
-All services are available at the ```VIRTUAL_HOST``` specified in
-[docker-compose.yml](docker-compose.yml).  Examples:
-* Canvas is at [http://canvas.docker](http://canvas.docker)
-* Join is at [http://join.docker](http://join.docker)
-* Single Sign-on is at [http://sso.docker](http://sso.docker)
-* Public facing Braven website is at [http://braven.docker](http://braven.docker)
-* Braven Help is at [http://help.docker](http://help.docker)
-
-The two main admin users to be aware of are the following.  Ask your team-mate what the passwords are.
-* join.admin@bebraven.org - access to the Join server's admin dashboard.  Login [here](http://join.docker/admin).
-* admin@beyondz.org - access to the Portal admin account.  Login [here](http://canvas.docker)
+All services are available at the service name specified in the 
+[docker-compose.yml](docker-compose.yml) inside that repository.  Examples:
+* Canvas is at [http://canvasweb](http://canvasweb)
+* Canvas JS/CSS is at [http://cssjsweb/](http://cssjsweb/bz_custom.css)
+* Join is at [http://joinweb](http://joinweb)
+* Single Sign-on is at [http://ssoweb](http://ssoweb)
 
 # Tips and Tricks
 ## Development
@@ -62,6 +55,8 @@ development branch:
 git checkout staging; git pull upstream staging; git branch -d
 [some_branch]
 ```
+# OBSOLETE FROM HERE ON DOWN. UPDATE ME!!
+
 ## Docker
 There are two modes to setup your Docker development environment.  The default lightweight environment uses ```setup.bat``` and ```start.bat``` which only setup and start the basic services.  However, if you want to develop something on the public Braven website or Braven Help, use ```setupall.bat``` and ```startall.bat``` to run the full dev env.  This is done because running all the services is very resource intensive on your machine.  In fact, the development environment is so resource intensive that you probably want to run ```stop.bat``` when you are not actively developing and then ```start.bat``` when you are ready to work again.
 
