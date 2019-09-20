@@ -12,8 +12,9 @@ cd [some_root_src_dir]
 git clone https://github.com/[your_username]/development.git development
 cd development
 ./setup.bat
-./start.bat
 ```
+
+# OBSOLETE FROM HERE ON DOWN. UPDATE ME!!
 
 # Connecting to services
 All services are available at the ```VIRTUAL_HOST``` specified in
