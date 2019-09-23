@@ -36,6 +36,7 @@ join_src_path="$( cd $bash_src_path; cd beyondz-platform && pwd )"
 canvas_src_path="$( cd $bash_src_path; cd canvas-lms && pwd )"
 canvasjscss_src_path="$( cd $bash_src_path; cd canvas-lms-js-css && pwd )"
 sso_src_path="$( cd $bash_src_path; cd rubycas-server && pwd )"
+kits_src_path="$( cd $bash_src_path; cd kits && pwd )"
 nginx_dev_src_path="$( cd $bash_src_path; cd nginx-dev && pwd )"
 
 if [ "$(uname)" == "Darwin" ]; then
@@ -80,6 +81,9 @@ if [ "$(uname)" == "Darwin" ]; then
 
   (cd $join_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
+  echo "Setting up Kits development environment at: $kits_src_path"
+  (cd $kits_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
+
   echo "Setting up Portal aka Canvas/LMS development environment at: $canvas_src_path"
   (cd $canvas_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
@@ -91,6 +95,12 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Loading a dev DB into your Portal dev env"
   (cd $canvas_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+
+  echo "Loading a dev DB into your Kits dev env"
+  (cd $kits_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+
+  echo "Loading the dev uploads and plugins into your Kits dev env"
+  (cd $kits_src_path && ./docker-compose/scripts/contentrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/contentrefresh.sh failed."; exit 1; })
 
   if ! grep -q "^[^#].*joinweb" /etc/hosts; then
     echo "########### TODO: #############"
@@ -110,6 +120,11 @@ if [ "$(uname)" == "Darwin" ]; then
   if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
     echo "########### TODO: #############"
     echo "Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
+  fi
+
+  if ! grep -q "^[^#].*kitweb" /etc/hosts; then
+    echo "########### TODO: #############"
+    echo "Run this: sudo bash -c ''echo "127.0.0.1     kitsweb" >> /etc/hosts'''
   fi
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
