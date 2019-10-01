@@ -1,9 +1,11 @@
-rubycas-server
-beyondz-platform
-canvas-lms
-canvas-lms-js-css
-kits
-nginx-dev
+# The format of this file is: repo_name branch_name
+# Where branch_name is the main branch we develop off of.
+rubycas-server master
+beyondz-platform staging
+canvas-lms bz-staging
+canvas-lms-js-css staging
+kits staging
+nginx-dev master
 #
 # TODO: get these next ones going after the above ones work (if we plan to keep using them)
 #braven_2
