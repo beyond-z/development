@@ -122,7 +122,7 @@ if [ "$(uname)" == "Darwin" ]; then
     echo 'Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
   fi
 
-  if ! grep -q "^[^#].*kitweb" /etc/hosts; then
+  if ! grep -q "^[^#].*kitsweb" /etc/hosts; then
     echo "########### TODO: #############"
     echo 'Run this: sudo bash -c ''echo "127.0.0.1     kitsweb" >> /etc/hosts'''
   fi
