@@ -14,23 +14,30 @@ if [[ $current_repo != *".git" ]]; then
 fi
 
 origin_url=${current_repo%development.git}
-while read repo_name; do
-  if [[ $repo_name =~ ^# ]]; then 
+while read git_info_line; do
+  if [[ $git_info_line =~ ^# ]]; then 
     # Skip comments
     continue;
-  elif [ -d $repo_name/.git ]; then
-    echo "Skipping clone of $repo_name because it already exists"
-    # TODO: run a git pull upstream command so that it's using the latest code.
+  fi
+  git_info=($git_info_line)
+  repo_name=${git_info[0]}
+  branch_name=${git_info[1]}
+  if [ -d $repo_name/.git ]; then
+    update_cmd_to_run1="git checkout ${branch_name}"
+    update_cmd_to_run2="git pull upstream ${branch_name}"
+    echo "Running: cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2"
+    (cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2 || { echo >&2 "Error: failed to pull from upstream."; exit 1; })
   else
     clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
     echo "Running: $clone_cmd_to_run"
-    $clone_cmd_to_run || { echo >&2 "FAILED. Make sure you have forked ${repo_name}"; exit 1; }
+    $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
     upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
     echo "Adding upstream: $upstream_cmd_to_run"
-    (cd $repo_name && $upstream_cmd_to_run)
+    (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
   fi
 done < repos.txt
 
+# TODO: set these paths in the above loop so they are controlled by repos.txt
 bash_src_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 join_src_path="$( cd $bash_src_path; cd beyondz-platform && pwd )"
 canvas_src_path="$( cd $bash_src_path; cd canvas-lms && pwd )"
@@ -103,28 +110,28 @@ if [ "$(uname)" == "Darwin" ]; then
   (cd $kits_src_path && ./docker-compose/scripts/contentrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/contentrefresh.sh failed."; exit 1; })
 
   if ! grep -q "^[^#].*joinweb" /etc/hosts; then
-    echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     joinweb" >> /etc/hosts'''
+    echo "########### NOTE: #############"
+    echo "Run this: sudo bash -c 'echo \"127.0.0.1     joinweb\" >> /etc/hosts'"
   fi
 
   if ! grep -q "^[^#].*ssoweb" /etc/hosts; then
-    echo "########### TODO: #############"
-    echo 'Run this: sudo bash -c ''echo "127.0.0.1     ssoweb" >> /etc/hosts'''
+    echo "########### NOTE: #############"
+    echo "Run this: sudo bash -c 'echo \"127.0.0.1     ssoweb\" >> /etc/hosts'"
   fi
 
   if ! grep -q "^[^#].*canvasweb" /etc/hosts; then
-    echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     canvasweb" >> /etc/hosts'''
+    echo "########### NOTE: #############"
+    echo "Run this: sudo bash -c 'echo \"127.0.0.1     canvasweb\" >> /etc/hosts'"
   fi
 
   if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
-    echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
+    echo "########### NOTE: #############"
+    echo "Run this: sudo bash -c 'echo \"127.0.0.1     cssjsweb\" >> /etc/hosts'"
   fi
 
-  if ! grep -q "^[^#].*kitweb" /etc/hosts; then
-    echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     kitsweb" >> /etc/hosts'''
+  if ! grep -q "^[^#].*kitsweb" /etc/hosts; then
+    echo "########### NOTE: #############"
+    echo "Run this: sudo bash -c 'echo \"127.0.0.1     kitsweb\" >> /etc/hosts'"
   fi
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
