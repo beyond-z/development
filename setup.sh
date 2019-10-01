@@ -101,10 +101,10 @@ if [ "$(uname)" == "Darwin" ]; then
   (cd $nginx_dev_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
   echo "Loading a dev DB into your Join dev env"
-  (cd $join_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+  (cd $join_src_path && docker-compose exec joinweb bundle exec rake db:create && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
   echo "Loading a dev DB into your Portal dev env"
-  (cd $canvas_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
+  (cd $canvas_src_path && docker-compose exec canvasweb bundle exec rake db:create && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
   echo "Loading a dev DB into your Kits dev env"
   (cd $kits_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
