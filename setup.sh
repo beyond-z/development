@@ -104,7 +104,7 @@ if [ "$(uname)" == "Darwin" ]; then
 
   if ! grep -q "^[^#].*joinweb" /etc/hosts; then
     echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     joinweb" >> /etc/hosts'''
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     joinweb" >> /etc/hosts'''
   fi
 
   if ! grep -q "^[^#].*ssoweb" /etc/hosts; then
@@ -114,17 +114,17 @@ if [ "$(uname)" == "Darwin" ]; then
 
   if ! grep -q "^[^#].*canvasweb" /etc/hosts; then
     echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     canvasweb" >> /etc/hosts'''
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     canvasweb" >> /etc/hosts'''
   fi
 
   if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
     echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     cssjsweb" >> /etc/hosts'''
   fi
 
   if ! grep -q "^[^#].*kitweb" /etc/hosts; then
     echo "########### TODO: #############"
-    echo "Run this: sudo bash -c ''echo "127.0.0.1     kitsweb" >> /etc/hosts'''
+    echo 'Run this: sudo bash -c ''echo "127.0.0.1     kitsweb" >> /etc/hosts'''
   fi
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
