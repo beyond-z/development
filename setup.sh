@@ -27,6 +27,9 @@ while read git_info_line; do
     update_cmd_to_run2="git pull upstream ${branch_name}"
     echo "Running: cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2"
     (cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2 || { echo >&2 "Error: failed to pull from upstream."; exit 1; })
+    # TODO: automate this
+    echo "### The $repo_name repo was already on your local machine. You may have to rebuild the docker image b/c new code was pulled from upstream by running:"
+    echo "cd $repo_name && ./docker-compose/scripts/rebuild.sh"
   else
     clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
     echo "Running: $clone_cmd_to_run"
