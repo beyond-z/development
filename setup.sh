@@ -76,6 +76,10 @@ if [ "$(uname)" == "Darwin" ]; then
     echo "You good!"
   fi
 
+  # TODO: this only really works for the the first time install. If one of the container's gets built
+  # and is out of date needing a rebuild, this script doesn't handle that. It probably should. Maybe change
+  # everything to run the docker-compose/scripts/rebuild script?
+
   echo "Setting up Canvas JS/CSS development environment at: $canvasjscss_src_path"
   (cd $canvasjscss_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
@@ -112,30 +116,8 @@ if [ "$(uname)" == "Darwin" ]; then
   echo "Loading the dev uploads and plugins into your Kits dev env"
   (cd $kits_src_path && ./docker-compose/scripts/contentrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/contentrefresh.sh failed."; exit 1; })
 
-  if ! grep -q "^[^#].*joinweb" /etc/hosts; then
-    echo "########### NOTE: #############"
-    echo "Run this: sudo bash -c 'echo \"127.0.0.1     joinweb\" >> /etc/hosts'"
-  fi
-
-  if ! grep -q "^[^#].*ssoweb" /etc/hosts; then
-    echo "########### NOTE: #############"
-    echo "Run this: sudo bash -c 'echo \"127.0.0.1     ssoweb\" >> /etc/hosts'"
-  fi
-
-  if ! grep -q "^[^#].*canvasweb" /etc/hosts; then
-    echo "########### NOTE: #############"
-    echo "Run this: sudo bash -c 'echo \"127.0.0.1     canvasweb\" >> /etc/hosts'"
-  fi
-
-  if ! grep -q "^[^#].*cssjsweb" /etc/hosts; then
-    echo "########### NOTE: #############"
-    echo "Run this: sudo bash -c 'echo \"127.0.0.1     cssjsweb\" >> /etc/hosts'"
-  fi
-
-  if ! grep -q "^[^#].*kitsweb" /etc/hosts; then
-    echo "########### NOTE: #############"
-    echo "Run this: sudo bash -c 'echo \"127.0.0.1     kitsweb\" >> /etc/hosts'"
-  fi
+  echo "Checking if /etc/hosts needs to be setup"
+  ./setup_etc_hosts.sh
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   # GNU/Linux platform
