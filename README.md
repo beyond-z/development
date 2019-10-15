@@ -23,6 +23,8 @@ cd development
 
 After the initial setup, you may have to restart each app after the databases have all loaded b/c we haven't yet solved the timing issue for the app to wait and retry until the DB is up.
 
+*Note: this `setup.sh` script is really only meant for initial setup. Once you have run it once, it may not do what you expect b/c it doesn't rebuild the environment. After initial setup, use the local `docker-compose/scripts/rebuild.sh` for any apps that you want to cleanly pull in all the latest changes.*
+
 # Connecting to services
 All services are available at the service name specified in the 
 [docker-compose.yml](docker-compose.yml) inside that repository.  Examples:
