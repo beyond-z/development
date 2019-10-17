@@ -35,10 +35,7 @@ All services are available at the service name specified in the
 * Kits is at [http://kitsweb](http://kitsweb)
 
 # Development
-We use a standard fork/branch/pull-request workflow. To make changes,
-always start with that repository's ```staging``` branch and create your
-own branch from it.  Here is an example of making a change to the Join
-server (aka beyondz-platform):
+We use a standard [fork/branch/pull-request workflow](http://nathanhoad.net/git-workflow-forks-remotes-and-pull-requests). To make changes, always start with that repository's ```staging``` branch and create your own branch from it.  Here is an example of making a change to the Join server (aka beyondz-platform):
 ```Shell
 cd development/beyondz-platform
 git pull upstream staging
@@ -89,25 +86,3 @@ parse_git_branch() {
   }
 PS1="\w(\$(parse_git_branch)) $ "
 ```
-
-# OBSOLETE FROM HERE ON DOWN. UPDATE ME!!
-
-## Docker
-There are two modes to setup your Docker development environment.  The default lightweight environment uses ```setup.bat``` and ```start.bat``` which only setup and start the basic services.  However, if you want to develop something on the public Braven website or Braven Help, use ```setupall.bat``` and ```startall.bat``` to run the full dev env.  This is done because running all the services is very resource intensive on your machine.  In fact, the development environment is so resource intensive that you probably want to run ```stop.bat``` when you are not actively developing and then ```start.bat``` when you are ready to work again.
-
-Each repository has some helpful scripts to interact with your local
-service using docker in ```[some_repo]/docker-compose/scripts```.  E.g.
-you can restart the ```canvas-lms``` server using ```canvas-lms/docker-compose/scripts/restart.bat```
-
-You can run the same commands directly using ```docker``` and ```docker-compose```.
-Note: all service names are located in [docker-compose.yml](docker-compose.yml) E.g. the Join web server service is named ```joinweb```
-
-Here are some examples:
-* See the status of your containers: ```docker ps```
-* Get the server logs from a service: ```docker-compose logs
-  [service_name]```
-* Restart a service: ```docker-compose restart [service_name]```
-* Connect to a shell for a service: ```docker-compose run --rm
-  [service_name] /bin/bash```
-* Run a rake command for a service: ```docker-compose run --rm
-  [service_name] bundle exec rake [rake_task]```
