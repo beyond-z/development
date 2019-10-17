@@ -43,8 +43,7 @@ git push staging origin
 git checkout -b [some_branch]
 ```
 
-Then make your code changes.  To get them back into the main code,
-submit a pull request:
+Then make your code changes.
 
 ```Shell
 git add [your_changed_files]
@@ -55,8 +54,7 @@ git commit -v
 git push origin [some_branch]
 ```
 
-Login to github and open Pull Request against the parent beyond-z
-repository that you forked from.
+To get them back into the main codebase login to [github](https://github.com) in your browser and submit a Pull Request against the `beyond-z` repo you forked.
 
 Once the Pull Request is merged back to staging, you can delete your
 development branch:
@@ -64,6 +62,8 @@ development branch:
 git checkout staging; git pull upstream staging; git branch -d
 [some_branch]; git push origin staging
 ```
+*Note*: You can commit multiple times to your branch before you are ready to open a Pull Request. You can also keep committing to your branch even after the Pull Request has been opened as long as it hasn't been merged yet. Just remember to push your commits to `origin` for them to be included in the Pull Request.
+
 
 # Tips and Tricks
 I highly recommend you add this to your `~/.bash_profile`
