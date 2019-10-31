@@ -61,8 +61,7 @@ To get them back into the main codebase login to [github](https://github.com) in
 
 Choose a couple fellow developers and request a code review. Once at least one developer approves your pull request, you can merge it and delete the branch on [github](https://github.com). Then you're ready to start working on your next feature, so do some cleanup first and then start this flow all over again!
 ```Shell
-git checkout staging; git pull upstream staging; git branch -d
-[some_branch]; git push origin staging
+git checkout staging; git pull upstream staging; git branch -d [some_branch]; git push origin staging
 ```
 *Note*: You can commit multiple times to your branch before you are ready to open a Pull Request. You can also keep committing to your branch even after the Pull Request has been opened as long as it hasn't been merged yet. Just remember to push your commits to `origin` for them to be included in the Pull Request.
 
