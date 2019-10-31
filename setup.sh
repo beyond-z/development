@@ -29,24 +29,14 @@ while read git_info_line; do
     (cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2 || { echo >&2 "Error: failed to pull from upstream."; exit 1; })
     # TODO: automate this
     echo "### The $repo_name repo was already on your local machine. You may have to rebuild the docker image b/c new code was pulled from upstream by running:"
-    if [[ $repo_name == 'platform' ]]; then 
-      echo "Skipping Platform until rebuild.sh is made"
-      continue;
-    else
-      echo "cd $repo_name && ./docker-compose/scripts/rebuild.sh"
-    fi
+    echo "cd $repo_name && ./docker-compose/scripts/rebuild.sh"
   else
-    if [[ $repo_name == 'platform' ]]; then 
-      echo "Skipping Platform because we will not be forking"
-      continue;
-    else
-      clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
-      echo "Running: $clone_cmd_to_run"
-      $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
-      upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
-      echo "Adding upstream: $upstream_cmd_to_run"
-      (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
-    fi
+    clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
+    echo "Running: $clone_cmd_to_run"
+    $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
+    upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
+    echo "Adding upstream: $upstream_cmd_to_run"
+    (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
   fi
 done < repos.txt
 
