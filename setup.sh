@@ -29,14 +29,24 @@ while read git_info_line; do
     (cd $repo_name && $update_cmd_to_run1 && $update_cmd_to_run2 || { echo >&2 "Error: failed to pull from upstream."; exit 1; })
     # TODO: automate this
     echo "### The $repo_name repo was already on your local machine. You may have to rebuild the docker image b/c new code was pulled from upstream by running:"
-    echo "cd $repo_name && ./docker-compose/scripts/rebuild.sh"
+    if [[ $repo_name == 'platform' ]]; then 
+      echo "Skipping Platform until rebuild.sh is made"
+      continue;
+    else
+      echo "cd $repo_name && ./docker-compose/scripts/rebuild.sh"
+    fi
   else
-    clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
-    echo "Running: $clone_cmd_to_run"
-    $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
-    upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
-    echo "Adding upstream: $upstream_cmd_to_run"
-    (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
+    if [[ $repo_name == 'platform' ]]; then 
+      echo "Skipping Platform because we will not be forking"
+      continue;
+    else
+      clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
+      echo "Running: $clone_cmd_to_run"
+      $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
+      upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
+      echo "Adding upstream: $upstream_cmd_to_run"
+      (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
+    fi
   fi
 done < repos.txt
 
@@ -48,6 +58,7 @@ canvasjscss_src_path="$( cd $bash_src_path; cd canvas-lms-js-css && pwd )"
 sso_src_path="$( cd $bash_src_path; cd rubycas-server && pwd )"
 kits_src_path="$( cd $bash_src_path; cd kits && pwd )"
 nginx_dev_src_path="$( cd $bash_src_path; cd nginx-dev && pwd )"
+platform_src_path="$( cd $bash_src_path; cd platform && pwd )"
 
 if [ "$(uname)" == "Darwin" ]; then
   # OS X platform
@@ -88,6 +99,9 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Setting up Join development environment at: $join_src_path"
 
+  echo "Setting up Platform development environment at: $platform_src_path"
+  (cd $platform_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
+
   # TODO: verify this is still necessary and either remove or uncomment.
   # This file changes locally in the dev env.  We need it in src ctrl for Travis 
   # to work but we want to ignore local changes.
@@ -115,6 +129,10 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Loading the dev uploads and plugins into your Kits dev env"
   (cd $kits_src_path && ./docker-compose/scripts/contentrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/contentrefresh.sh failed."; exit 1; })
+
+  echo "Loading the dev DB into your Platform dev env"
+  # @TODO: Populate DBs with values from server when ready
+  (cd $platform_src_path && docker-compose exec platformweb bundle exec rake db:create db:schema:load db:migrate db:seed)
 
   echo "Checking if /etc/hosts needs to be setup"
   ./setup_etc_hosts.sh
