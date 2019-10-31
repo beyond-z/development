@@ -34,9 +34,14 @@ while read git_info_line; do
     clone_cmd_to_run="git clone ${origin_url}${repo_name} ${repo_name}"
     echo "Running: $clone_cmd_to_run"
     $clone_cmd_to_run || { echo >&2 "Error: Make sure you have forked ${repo_name}"; exit 1; }
-    upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
-    echo "Adding upstream: $upstream_cmd_to_run"
-    (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
+    if [[ $repo_name == 'platform' ]]; then 
+      echo "Skipping for Platform. Not part of beyond-z"
+      continue;
+    else
+      upstream_cmd_to_run="git remote add upstream https://github.com/beyond-z/${repo_name}"
+      echo "Adding upstream: $upstream_cmd_to_run"
+      (cd $repo_name && $upstream_cmd_to_run || { echo >&2 "Error: failed to add upstream remote."; exit 1; })
+    fi
   fi
 done < repos.txt
 
