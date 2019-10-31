@@ -21,7 +21,7 @@ cd development
 ./setup.sh
 ```
 
-After the initial setup, you may have to restart each app after the databases have all loaded b/c we haven't yet solved the timing issue for the app to wait and retry until the DB is up.
+After the initial setup, you may have to *restart each app* one time after the databases have all loaded b/c we haven't yet solved the timing issue for the app to wait and retry until the DB is up.
 
 *Note: this `setup.sh` script is really only meant for initial setup. Once you have run it once, it may not do what you expect b/c it doesn't rebuild the environment. After initial setup, use the local `docker-compose/scripts/rebuild.sh` for any apps that you want to cleanly pull in all the latest changes.*
 
@@ -35,15 +35,18 @@ All services are available at the service name specified in the
 * Kits is at [http://kitsweb](http://kitsweb)
 
 # Development
-We use a standard [fork/branch/pull-request workflow](http://nathanhoad.net/git-workflow-forks-remotes-and-pull-requests). To make changes, always start with that repository's ```staging``` branch and create your own branch from it.  Here is an example of making a change to the Join server (aka beyondz-platform):
+We use a standard [fork/branch/pull-request workflow](http://nathanhoad.net/git-workflow-forks-remotes-and-pull-requests). To make changes, always start with that repository's ```staging``` branch and create your own branch from it.  Here is an example of making a change to the **Join** server (aka beyondz-platform):
 ```Shell
 cd development/beyondz-platform
 git pull upstream staging
-git push staging origin
 git checkout -b [some_branch]
 ```
 
-Then make your code changes.
+Then make your code changes. You can see your changes take effect in the browser by going to [http://joinweb](http://joinweb).
+
+See below for some tips and tricks to manage the Docker environment if you're not seeing your change take effect or if you need to get an updated database or content to work from.
+
+Once you're changes look good, commit them and open a pull request. Also see note below about multiple commits.
 
 ```Shell
 git add [your_changed_files]
@@ -54,10 +57,9 @@ git commit -v
 git push origin [some_branch]
 ```
 
-To get them back into the main codebase login to [github](https://github.com) in your browser and submit a Pull Request against the `beyond-z` repo you forked.
+To get them back into the main codebase login to [github](https://github.com) in your browser and submit a Pull Request against the `staging` branch of the `beyond-z` repo you forked.
 
-Once the Pull Request is merged back to staging, you can delete your
-development branch:
+Choose a couple fellow developers and request a code review. Once at least one developer approves your pull request, you can merge it and delete the branch on [github](https://github.com). Then you're ready to start working on your next feature, so do some cleanup first and then start this flow all over again!
 ```Shell
 git checkout staging; git pull upstream staging; git branch -d
 [some_branch]; git push origin staging
@@ -66,7 +68,8 @@ git checkout staging; git pull upstream staging; git branch -d
 
 
 # Tips and Tricks
-I highly recommend you add this to your `~/.bash_profile`
+## Docker
+I highly recommend you add this to your `~/.bash_profile` so that you can restart your docker container, connect to the container, the database, the console, or rebuild your container using commands like `devrs`, `deva`, etc for the app that you are currently working in.
 ```
 # If you're in the app root of any of our repos, these aliases let you 
 # manage the dev env easy
@@ -77,6 +80,25 @@ alias devc='./docker-compose/scripts/console.sh'
 alias deva='./docker-compose/scripts/appconnect.sh'
 ```
 
+If you restart your computer or restart the Docker daemon and your containers are stopped, you can bring them all back up by running `up.sh` from the `development` directory. You'll know you need to do this if you run `docker container ls` and don't see something like:
+
+```
+STATUS              PORTS                            NAMES
+Up 40 minutes       0.0.0.0:3000->3000/tcp           canvas-lms_canvasweb_1
+Up 40 minutes       6379/tcp                         canvas-lms_canvasredis_1
+Up 40 minutes       5432/tcp                         canvas-lms_canvasdb_1
+Up 2 days           80/tcp, 0.0.0.0:3005->3005/tcp   kits_kitsweb_1
+Up 2 days           3306/tcp, 33060/tcp              kits_kitsdb_1
+Up 2 days           0.0.0.0:3001->3001/tcp           beyondz-platform_joinweb_1
+Up 2 days           5432/tcp                         beyondz-platform_joindb_1
+Up 9 days           0.0.0.0:3002->3002/tcp           rubycas-server_ssoweb_1
+Up 9 days           5432/tcp                         rubycas-server_ssodb_1
+Up 9 days           0.0.0.0:80->80/tcp               nginx-dev_nginx_dev_1
+Up 10 days          0.0.0.0:3004->3004/tcp           canvas-lms-js-css_cssjsweb_1
+```
+
+Most changes you make to the code should just automatically take effect, but sometimes you'll need to restart or rebuild your container if you touch something that is built into the container image itself using `devrs` or `devrb`.
+## General
 Also, if you add this as well, it will show the current branch you're on in the shell. E.g.
 `~/src/development/beyondz-platform(current_branch_name) $`
 ```
