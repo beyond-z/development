@@ -33,6 +33,8 @@ All services are available at the service name specified in the
 * Join is at [http://joinweb](http://joinweb)
 * Single Sign-on is at [http://ssoweb](http://ssoweb)
 * Kits is at [http://kitsweb](http://kitsweb)
+* Braven Platform is at [http://platformweb](http://platformweb)
+* BeBraven.org is at [http://bravenweb](http://bravenweb)
 
 # Development
 We use a standard [fork/branch/pull-request workflow](http://nathanhoad.net/git-workflow-forks-remotes-and-pull-requests). To make changes, always start with that repository's ```staging``` branch and create your own branch from it.  Here is an example of making a change to the **Join** server (aka beyondz-platform):
