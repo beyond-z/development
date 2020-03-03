@@ -52,6 +52,7 @@ canvas_src_path="$( cd $bash_src_path; cd canvas-lms && pwd )"
 canvasjscss_src_path="$( cd $bash_src_path; cd canvas-lms-js-css && pwd )"
 sso_src_path="$( cd $bash_src_path; cd rubycas-server && pwd )"
 kits_src_path="$( cd $bash_src_path; cd kits && pwd )"
+bebraven_src_path="$( cd $bash_src_path; cd braven_2 && pwd )"
 nginx_dev_src_path="$( cd $bash_src_path; cd nginx-dev && pwd )"
 platform_src_path="$( cd $bash_src_path; cd platform && pwd )"
 
@@ -107,6 +108,9 @@ if [ "$(uname)" == "Darwin" ]; then
   echo "Setting up Kits development environment at: $kits_src_path"
   (cd $kits_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
+  echo "Setting up BeBraven.org development environment at: $bebraven_src_path"
+  (cd $bebraven_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
+
   echo "Setting up Portal aka Canvas/LMS development environment at: $canvas_src_path"
   (cd $canvas_src_path && docker-compose up -d || { echo >&2 "Error: docker-compose build failed."; exit 1; })
 
@@ -124,6 +128,9 @@ if [ "$(uname)" == "Darwin" ]; then
 
   echo "Loading the dev uploads and plugins into your Kits dev env"
   (cd $kits_src_path && ./docker-compose/scripts/contentrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/contentrefresh.sh failed."; exit 1; })
+
+  echo "Loading a dev DB into your BeBraven.org dev env and downloading uploads and plugins"
+  (cd $bebraven_src_path && ./docker-compose/scripts/dbrefresh.sh || { echo >&2 "Error: ./docker-compose/scripts/dbrefresh.sh failed."; exit 1; })
 
   echo "Loading the dev DB into your Platform dev env"
   # @TODO: Populate DBs with values from server when ready

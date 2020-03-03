@@ -8,9 +8,9 @@ canvas-lms-js-css staging cssjsweb
 kits staging kitsweb
 nginx-dev master nginx_dev
 platform staging platformweb
+braven_2 staging bravenweb
 #
 # TODO: get these next ones going after the above ones work (if we plan to keep using them)
-#braven_2
 #salesforce
 #career-mgr
 #datacentral
