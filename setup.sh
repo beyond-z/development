@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "This script needs to be updated to setup https://github.com/bebraven/canvas-lms instead of https://github.com/beyond-z/canvas-lms"
+echo "Also, ideally it would directly clone the repo's instead of making people fork them first. We want to switch our dev flow away from the open source fork flow to just be branch based off the team repo."
+exit 1;
+
 # Setup subdirectories for each project using forked versions of each.  Note: we initially
 # tried to use git submodules, but it was too hard to actively develop using those with a fork/pull workflow
 echo "Cloning all repositories.  IMPORTANT: this assumes that you've forked each repository already"
