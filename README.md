@@ -79,6 +79,7 @@ alias devrb='./docker-compose/scripts/rebuild.sh'
 alias devdb='./docker-compose/scripts/dbconnect.sh'
 alias devc='./docker-compose/scripts/console.sh'
 alias deva='./docker-compose/scripts/appconnect.sh'
+alias devl='docker-compose logs -f
 ```
 
 If you restart your computer or restart the Docker daemon and your containers are stopped, you can bring them all back up by running `up.sh` from the `development` directory. You'll know you need to do this if you run `docker container ls` and don't see something like:
