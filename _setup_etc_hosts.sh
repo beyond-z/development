@@ -30,4 +30,3 @@ then
 else
   echo "/etc/hosts is alread setup. Skipping!"
 fi
-
