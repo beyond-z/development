@@ -7,7 +7,7 @@ canvasjscss_src_path="$( cd $bash_src_path; cd canvas-lms-js-css && pwd )"
 nginx_dev_src_path="$( cd $bash_src_path; cd nginx-dev && pwd )"
 platform_src_path="$( cd $bash_src_path; cd platform && pwd )"
 
-dirs=($nginx_dev_src_path $canvasjscss_src_path $platform_src_path $join_src_path $canvas_src_path)
+dirs=($canvasjscss_src_path $platform_src_path $join_src_path $canvas_src_path $nginx_dev_src_path )
 
 for path_dir in ${dirs[@]}; do
   echo "=================== Setting up repository at: $path_dir ==================="
