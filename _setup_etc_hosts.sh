@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 hosts_to_add=''
 while read git_info_line; do
@@ -30,4 +30,3 @@ then
 else
   echo "/etc/hosts is alread setup. Skipping!"
 fi
-
