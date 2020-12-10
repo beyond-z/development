@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 hosts_to_add=''
 while read git_info_line; do
@@ -28,5 +28,5 @@ then
     echo "$hosts_to_add" >> /etc/hosts
   fi
 else
-  echo "/etc/hosts is alread setup. Skipping!"
+  echo "/etc/hosts is already setup. Skipping!"
 fi
